@@ -13,13 +13,13 @@ export const metadata: Metadata = {
 };
 
 const stageColors: Record<string, string> = {
-  received: "bg-blue-100 text-blue-800",
-  processing: "bg-yellow-100 text-yellow-800",
-  printing: "bg-orange-100 text-orange-800",
-  quality_check: "bg-purple-100 text-purple-800",
-  shipped: "bg-green-100 text-green-800",
-  delivered: "bg-emerald-100 text-emerald-800",
-  cancelled: "bg-red-100 text-red-800",
+  received: "bg-blue-50 text-blue-700 border-blue-200/60",
+  processing: "bg-amber-50 text-amber-700 border-amber-200/60",
+  printing: "bg-orange-50 text-orange-700 border-orange-200/60",
+  quality_check: "bg-purple-50 text-purple-700 border-purple-200/60",
+  shipped: "bg-emerald-50 text-emerald-700 border-emerald-200/60",
+  delivered: "bg-green-50 text-green-700 border-green-200/60",
+  cancelled: "bg-red-50 text-red-700 border-red-200/60",
 };
 
 interface SearchParams {
@@ -75,7 +75,6 @@ export default async function OrdersPage({
     orderId: doc.id,
   })) as Order[];
 
-  // Client-side search filter
   if (search) {
     const q = search.toLowerCase();
     orders = orders.filter(
@@ -100,7 +99,7 @@ export default async function OrdersPage({
           canCreateOrder ? (
             <Link
               href="/orders/create"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-b from-indigo-500 to-indigo-600 text-white rounded-xl hover:from-indigo-600 hover:to-indigo-700 transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md hover:shadow-indigo-200/50 active:scale-[0.97] border border-indigo-600/20"
             >
               <svg
                 className="w-4 h-4"
@@ -122,10 +121,10 @@ export default async function OrdersPage({
       />
 
       {/* Filter Bar */}
-      <Card className="p-4">
+      <Card className="p-4 animate-fade-in-up" style={{ animationDelay: "100ms" }}>
         <form className="flex flex-wrap gap-3 items-end">
           <div className="flex-1 min-w-48">
-            <label className="block text-xs font-medium text-gray-700 mb-1">
+            <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
               Search
             </label>
             <input
@@ -133,17 +132,17 @@ export default async function OrdersPage({
               name="search"
               defaultValue={search}
               placeholder="Customer name, email, order ID..."
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+              className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 focus:shadow-[0_0_0_4px_rgba(79,70,229,0.08)] hover:border-gray-300"
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
+            <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
               Stage
             </label>
             <select
               name="stage"
               defaultValue={stage || ""}
-              className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+              className="px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 bg-white hover:border-gray-300"
             >
               <option value="">All Stages</option>
               <option value="received">Received</option>
@@ -156,13 +155,13 @@ export default async function OrdersPage({
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">
+            <label className="block text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-1.5">
               Source
             </label>
             <select
               name="source"
               defaultValue={source || ""}
-              className="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+              className="px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 bg-white hover:border-gray-300"
             >
               <option value="">All Sources</option>
               <option value="shopify">Shopify</option>
@@ -171,14 +170,14 @@ export default async function OrdersPage({
           </div>
           <button
             type="submit"
-            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium transition-colors"
+            className="px-4 py-2.5 bg-gradient-to-b from-indigo-500 to-indigo-600 text-white rounded-xl hover:from-indigo-600 hover:to-indigo-700 text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md hover:shadow-indigo-200/50 active:scale-[0.97] border border-indigo-600/20"
           >
             Filter
           </button>
           {(stage || source || search) && (
             <Link
               href="/orders"
-              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors"
+              className="px-4 py-2.5 bg-gray-50 text-gray-600 rounded-xl hover:bg-gray-100 text-sm font-medium transition-all duration-200 border border-gray-200 hover:border-gray-300 active:scale-[0.97]"
             >
               Clear
             </Link>
@@ -187,24 +186,26 @@ export default async function OrdersPage({
       </Card>
 
       {/* Orders Table */}
-      <Card className="p-0 overflow-hidden">
+      <Card className="p-0 overflow-hidden animate-fade-in-up" style={{ animationDelay: "200ms" }}>
         {orders.length === 0 ? (
           <div className="text-center py-16">
-            <svg
-              className="w-12 h-12 text-gray-300 mx-auto mb-3"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-              />
-            </svg>
+            <div className="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center mx-auto mb-4">
+              <svg
+                className="w-8 h-8 text-gray-300"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                />
+              </svg>
+            </div>
             <p className="text-gray-500 text-sm font-medium">No orders found</p>
-            <p className="text-gray-400 text-xs mt-1">
+            <p className="text-gray-300 text-xs mt-1">
               {stage || source || search
                 ? "Try adjusting your filters"
                 : "Orders will appear here once created"}
@@ -212,42 +213,45 @@ export default async function OrdersPage({
             {canCreateOrder && !stage && !source && !search && (
               <Link
                 href="/orders/create"
-                className="mt-4 inline-flex items-center text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+                className="mt-4 inline-flex items-center gap-1 text-sm text-indigo-600 hover:text-indigo-700 font-medium transition-colors"
               >
-                Create your first order →
+                Create your first order
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </Link>
             )}
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-100">
+              <thead className="bg-gray-50/80 border-b border-gray-100/80">
                 <tr>
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th className="text-left py-3 px-4 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
                     Order ID
                   </th>
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th className="text-left py-3 px-4 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
                     Customer
                   </th>
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th className="text-left py-3 px-4 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
                     Size
                   </th>
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th className="text-left py-3 px-4 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
                     Qty
                   </th>
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th className="text-left py-3 px-4 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
                     Stage
                   </th>
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th className="text-left py-3 px-4 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
                     Source
                   </th>
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th className="text-left py-3 px-4 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
                     Total
                   </th>
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th className="text-left py-3 px-4 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
                     Created
                   </th>
-                  <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th className="text-left py-3 px-4 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
                     Design
                   </th>
                 </tr>
@@ -256,65 +260,65 @@ export default async function OrdersPage({
                 {orders.map((order) => (
                   <tr
                     key={order.orderId}
-                    className="hover:bg-gray-50 transition-colors"
+                    className="hover:bg-indigo-50/30 transition-colors group"
                   >
-                    <td className="py-3 px-4">
+                    <td className="py-3.5 px-4">
                       <Link
                         href={`/orders/${order.orderId}`}
-                        className="text-indigo-600 hover:text-indigo-700 font-mono text-xs font-medium"
+                        className="text-indigo-600 hover:text-indigo-700 font-mono text-xs font-medium transition-colors"
                       >
                         {order.orderId.substring(0, 12)}...
                       </Link>
                       {order.shopifyOrderNumber && (
-                        <p className="text-xs text-gray-400 mt-0.5">
+                        <p className="text-[11px] text-gray-300 mt-0.5">
                           #{order.shopifyOrderNumber}
                         </p>
                       )}
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-3.5 px-4">
                       <p className="text-gray-900 font-medium">
                         {order.customerName || "—"}
                       </p>
                       {order.customerEmail && (
-                        <p className="text-xs text-gray-400">
+                        <p className="text-[11px] text-gray-300 truncate max-w-40">
                           {order.customerEmail}
                         </p>
                       )}
                     </td>
-                    <td className="py-3 px-4 text-gray-600">
+                    <td className="py-3.5 px-4 text-gray-500">
                       {order.sizeInInches}&quot;
                     </td>
-                    <td className="py-3 px-4 text-gray-600">
+                    <td className="py-3.5 px-4 text-gray-500 tabular-nums">
                       {order.quantity}
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-3.5 px-4">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                        className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[11px] font-medium border ${
                           stageColors[order.currentStageKey] ||
-                          "bg-gray-100 text-gray-700"
+                          "bg-gray-50 text-gray-600 border-gray-200/60"
                         }`}
                       >
                         {order.currentStageKey?.replace(/_/g, " ")}
                       </span>
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-3.5 px-4">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                        className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[11px] font-medium border ${
                           order.source === "shopify"
-                            ? "bg-green-100 text-green-700"
-                            : "bg-purple-100 text-purple-700"
+                            ? "bg-emerald-50 text-emerald-600 border-emerald-200/60"
+                            : "bg-purple-50 text-purple-600 border-purple-200/60"
                         }`}
                       >
                         {order.source}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-gray-900 font-medium">
+                    <td className="py-3.5 px-4 text-gray-900 font-medium tabular-nums">
                       {formatCurrency(order.billingSnapshot?.total || 0)}
                     </td>
-                    <td className="py-3 px-4 text-gray-500 text-xs">
+                    <td className="py-3.5 px-4 text-gray-400 text-xs">
                       {formatRelativeTime(order.createdAt)}
                     </td>
-                    <td className="py-3 px-4">
+                    <td className="py-3.5 px-4">
                       {order.designAssets?.thumbnailUrl ||
                       order.designAssets?.designImageUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -324,12 +328,12 @@ export default async function OrdersPage({
                             order.designAssets.designImageUrl
                           }
                           alt="Design"
-                          className="w-10 h-10 object-cover rounded border border-gray-200"
+                          className="w-10 h-10 object-cover rounded-lg border border-gray-100 transition-transform duration-200 group-hover:scale-110"
                         />
                       ) : (
-                        <div className="w-10 h-10 bg-gray-100 rounded border border-gray-200 flex items-center justify-center">
+                        <div className="w-10 h-10 bg-gray-50 rounded-lg border border-gray-100 flex items-center justify-center">
                           <svg
-                            className="w-4 h-4 text-gray-400"
+                            className="w-4 h-4 text-gray-300"
                             fill="none"
                             viewBox="0 0 24 24"
                             stroke="currentColor"
@@ -352,7 +356,7 @@ export default async function OrdersPage({
         )}
       </Card>
 
-      <p className="text-xs text-gray-400 text-center">
+      <p className="text-[11px] text-gray-300 text-center animate-fade-in" style={{ animationDelay: "400ms" }}>
         Showing {orders.length} order{orders.length !== 1 ? "s" : ""}
         {stage || source || search ? " (filtered)" : ""}
       </p>

@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,10 +59,8 @@ export default function OnboardingForm() {
           `/api/onboarding/request-access?slug=${encodeURIComponent(slug)}`
         );
         if (res.status === 404) {
-          // 404 from GET means the shop doesn't exist — slug is available
           setSlugStatus({ available: true });
         } else if (res.ok) {
-          // 200 means shop exists — slug taken
           setSlugStatus({ available: false });
         } else {
           setSlugStatus({});
@@ -189,21 +188,21 @@ export default function OnboardingForm() {
 
   if (step === "choose") {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 animate-fade-in-up">
         <div className="text-center mb-2">
-          <h2 className="text-2xl font-bold text-gray-900">Get Started</h2>
-          <p className="text-gray-500 text-sm mt-1">
+          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Get Started</h2>
+          <p className="text-gray-400 text-sm mt-1">
             How would you like to use the platform?
           </p>
         </div>
 
         <Card
           hoverable
-          className="p-6 cursor-pointer"
+          className="p-6 cursor-pointer group"
           onClick={() => setStep("create-studio")}
         >
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-50 flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110">
               <svg
                 className="w-6 h-6 text-indigo-600"
                 fill="none"
@@ -218,16 +217,16 @@ export default function OnboardingForm() {
                 />
               </svg>
             </div>
-            <div>
-              <h3 className="font-semibold text-gray-900">
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-gray-900 tracking-tight">
                 Create a New Studio
               </h3>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-400 mt-1 leading-relaxed">
                 I want to create a new print studio account on the platform
               </p>
             </div>
             <svg
-              className="w-5 h-5 text-gray-300 flex-shrink-0 mt-1 ml-auto"
+              className="w-5 h-5 text-gray-300 flex-shrink-0 mt-1 ml-auto transition-all duration-200 group-hover:text-indigo-400 group-hover:translate-x-0.5"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -244,13 +243,13 @@ export default function OnboardingForm() {
 
         <Card
           hoverable
-          className="p-6 cursor-pointer"
+          className="p-6 cursor-pointer group"
           onClick={() => setStep("join-shop")}
         >
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center flex-shrink-0">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-50 flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110">
               <svg
-                className="w-6 h-6 text-green-600"
+                className="w-6 h-6 text-emerald-600"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -263,16 +262,16 @@ export default function OnboardingForm() {
                 />
               </svg>
             </div>
-            <div>
-              <h3 className="font-semibold text-gray-900">
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-gray-900 tracking-tight">
                 Join an Existing Shop
               </h3>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-400 mt-1 leading-relaxed">
                 I have a shop slug or code from an existing shop or Shopify store
               </p>
             </div>
             <svg
-              className="w-5 h-5 text-gray-300 flex-shrink-0 mt-1 ml-auto"
+              className="w-5 h-5 text-gray-300 flex-shrink-0 mt-1 ml-auto transition-all duration-200 group-hover:text-emerald-400 group-hover:translate-x-0.5"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -292,11 +291,11 @@ export default function OnboardingForm() {
 
   if (step === "create-studio") {
     return (
-      <Card className="p-8">
+      <Card className="p-8 border-glow animate-fade-in-up">
         <div className="flex items-center gap-3 mb-6">
           <button
             onClick={() => setStep("choose")}
-            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-400"
+            className="p-1.5 rounded-xl hover:bg-gray-100 transition-all duration-200 text-gray-400 hover:text-gray-600 active:scale-95"
           >
             <svg
               className="w-5 h-5"
@@ -312,7 +311,7 @@ export default function OnboardingForm() {
               />
             </svg>
           </button>
-          <h2 className="text-xl font-bold text-gray-900">
+          <h2 className="text-xl font-bold text-gray-900 tracking-tight">
             Create a New Studio
           </h2>
         </div>
@@ -327,8 +326,8 @@ export default function OnboardingForm() {
           />
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Studio Slug <span className="text-red-500">*</span>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+              Studio Slug <span className="text-red-400">*</span>
             </label>
             <div className="relative">
               <input
@@ -339,38 +338,56 @@ export default function OnboardingForm() {
                   setSlugManuallyEdited(true);
                 }}
                 placeholder="my-print-studio"
-                className="w-full px-3 py-2 pr-8 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono"
+                className={cn(
+                  "w-full px-3.5 py-2.5 pr-10 border rounded-xl text-sm font-mono",
+                  "transition-all duration-200",
+                  "focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 focus:shadow-[0_0_0_4px_rgba(79,70,229,0.08)]",
+                  "hover:border-gray-300",
+                  slugStatus.available === false
+                    ? "border-red-300 focus:ring-red-500/20 focus:border-red-400"
+                    : slugStatus.available === true
+                      ? "border-emerald-300 focus:ring-emerald-500/20 focus:border-emerald-400"
+                      : "border-gray-200"
+                )}
               />
-              {slugStatus.checking && (
-                <svg
-                  className="absolute right-2.5 top-2.5 w-4 h-4 text-gray-400 animate-spin"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-              )}
-              {slugStatus.available === true && (
-                <svg className="absolute right-2.5 top-2.5 w-4 h-4 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              )}
-              {slugStatus.available === false && (
-                <svg className="absolute right-2.5 top-2.5 w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              )}
+              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                {slugStatus.checking && (
+                  <svg
+                    className="w-4 h-4 text-gray-400 animate-spin"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                )}
+                {slugStatus.available === true && (
+                  <div className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center animate-scale-in">
+                    <svg className="w-3 h-3 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                )}
+                {slugStatus.available === false && (
+                  <div className="w-5 h-5 rounded-full bg-red-100 flex items-center justify-center animate-scale-in">
+                    <svg className="w-3 h-3 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </div>
+                )}
+              </div>
             </div>
             {slugStatus.available === true && (
-              <p className="text-xs text-green-600 mt-1">Slug is available!</p>
+              <p className="text-xs text-emerald-600 mt-1.5 flex items-center gap-1 animate-fade-in-down">
+                Slug is available!
+              </p>
             )}
             {slugStatus.available === false && (
-              <p className="text-xs text-red-600 mt-1">
+              <p className="text-xs text-red-600 mt-1.5 animate-fade-in-down">
                 This slug is already taken. Please choose a different one.
               </p>
             )}
-            <p className="text-xs text-gray-400 mt-1">
+            <p className="text-[11px] text-gray-300 mt-1.5">
               Lowercase letters, numbers and hyphens only, 3-30 characters
             </p>
           </div>
@@ -393,7 +410,7 @@ export default function OnboardingForm() {
           />
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Description (Optional)
             </label>
             <textarea
@@ -401,7 +418,7 @@ export default function OnboardingForm() {
               onChange={(e) => setStudioDescription(e.target.value)}
               placeholder="Tell us about your studio..."
               rows={3}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+              className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 focus:shadow-[0_0_0_4px_rgba(79,70,229,0.08)] hover:border-gray-300 resize-none"
             />
           </div>
 
@@ -420,7 +437,7 @@ export default function OnboardingForm() {
             Create Studio
           </Button>
 
-          <p className="text-xs text-gray-400 text-center">
+          <p className="text-xs text-gray-300 text-center">
             Your studio will be reviewed and activated by the platform
             administrator.
           </p>
@@ -431,11 +448,11 @@ export default function OnboardingForm() {
 
   if (step === "join-shop") {
     return (
-      <Card className="p-8">
+      <Card className="p-8 border-glow animate-fade-in-up">
         <div className="flex items-center gap-3 mb-6">
           <button
             onClick={() => setStep("choose")}
-            className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-400"
+            className="p-1.5 rounded-xl hover:bg-gray-100 transition-all duration-200 text-gray-400 hover:text-gray-600 active:scale-95"
           >
             <svg
               className="w-5 h-5"
@@ -451,14 +468,14 @@ export default function OnboardingForm() {
               />
             </svg>
           </button>
-          <h2 className="text-xl font-bold text-gray-900">
+          <h2 className="text-xl font-bold text-gray-900 tracking-tight">
             Join an Existing Shop
           </h2>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Shop Slug or Shopify Domain
             </label>
             <div className="relative">
@@ -467,11 +484,11 @@ export default function OnboardingForm() {
                 value={shopSlug}
                 onChange={(e) => setShopSlug(e.target.value)}
                 placeholder="e.g., xyz-tattoo or cool-store.myshopify.com"
-                className="w-full px-3 py-2 pr-8 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3.5 py-2.5 pr-10 border border-gray-200 rounded-xl text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 focus:shadow-[0_0_0_4px_rgba(79,70,229,0.08)] hover:border-gray-300"
               />
               {searchingShop && (
                 <svg
-                  className="absolute right-2.5 top-2.5 w-4 h-4 text-gray-400 animate-spin"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 animate-spin"
                   fill="none"
                   viewBox="0 0 24 24"
                 >
@@ -484,22 +501,23 @@ export default function OnboardingForm() {
 
           {/* Found shop */}
           {foundShop && (
-            <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-100 rounded-lg">
-              <div className="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center text-sm font-bold text-green-700 flex-shrink-0">
+            <div className="flex items-center gap-3 p-4 bg-emerald-50/60 border border-emerald-100 rounded-xl animate-fade-in-up">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-50 flex items-center justify-center text-sm font-bold text-emerald-700 flex-shrink-0">
                 {foundShop.displayName.charAt(0).toUpperCase()}
               </div>
-              <div className="min-w-0">
-                <p className="font-medium text-gray-900 text-sm">
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-gray-900 text-sm tracking-tight">
                   {foundShop.displayName}
                 </p>
-                <p className="text-xs text-gray-500">{foundShop.shopId}</p>
+                <p className="text-xs text-gray-400 truncate">{foundShop.shopId}</p>
               </div>
               <span
-                className={`ml-auto text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0 ${
+                className={cn(
+                  "text-[10px] px-2 py-0.5 rounded-lg font-medium flex-shrink-0 border",
                   foundShop.shopType === "shopify"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-purple-100 text-purple-700"
-                }`}
+                    ? "bg-emerald-50 text-emerald-600 border-emerald-200/60"
+                    : "bg-purple-50 text-purple-600 border-purple-200/60"
+                )}
               >
                 {foundShop.shopType}
               </span>
@@ -508,7 +526,7 @@ export default function OnboardingForm() {
 
           {/* Not found */}
           {shopSearchError && shopSlug && !searchingShop && (
-            <p className="text-sm text-red-600 text-center">
+            <p className="text-sm text-red-500 text-center animate-fade-in-down">
               {shopSearchError}
             </p>
           )}
@@ -522,7 +540,7 @@ export default function OnboardingForm() {
             Request Access
           </Button>
 
-          <p className="text-xs text-gray-400 text-center">
+          <p className="text-xs text-gray-300 text-center">
             Your request will be reviewed by the shop admin.
           </p>
         </div>

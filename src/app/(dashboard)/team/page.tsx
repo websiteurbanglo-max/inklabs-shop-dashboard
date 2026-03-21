@@ -12,16 +12,16 @@ export const metadata: Metadata = {
 };
 
 const roleColors: Record<string, string> = {
-  owner: "bg-purple-100 text-purple-700",
-  admin: "bg-blue-100 text-blue-700",
-  operator: "bg-green-100 text-green-700",
-  viewer: "bg-gray-100 text-gray-700",
+  owner: "bg-purple-50 text-purple-600 border-purple-200/60",
+  admin: "bg-blue-50 text-blue-600 border-blue-200/60",
+  operator: "bg-emerald-50 text-emerald-600 border-emerald-200/60",
+  viewer: "bg-gray-50 text-gray-500 border-gray-200/60",
 };
 
 const statusColors: Record<string, string> = {
-  active: "bg-emerald-100 text-emerald-700",
-  pending: "bg-yellow-100 text-yellow-700",
-  suspended: "bg-red-100 text-red-700",
+  active: "bg-emerald-50 text-emerald-600 border-emerald-200/60",
+  pending: "bg-amber-50 text-amber-600 border-amber-200/60",
+  suspended: "bg-red-50 text-red-600 border-red-200/60",
 };
 
 export default async function TeamPage() {
@@ -52,45 +52,47 @@ export default async function TeamPage() {
         description={`${members.length} member${members.length !== 1 ? "s" : ""} in your shop`}
       />
 
-      <Card className="p-4 bg-amber-50 border-amber-100">
+      <Card className="p-4 bg-amber-50/60 border-amber-100/80 animate-fade-in-up" style={{ animationDelay: "100ms" }}>
         <div className="flex gap-3">
-          <svg
-            className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <p className="text-sm text-amber-800">
+          <div className="w-8 h-8 rounded-lg bg-amber-100 flex items-center justify-center flex-shrink-0">
+            <svg
+              className="w-4 h-4 text-amber-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <p className="text-sm text-amber-800 pt-1.5">
             To add or manage team members, contact the platform administrator.
           </p>
         </div>
       </Card>
 
-      <Card className="p-0 overflow-hidden">
+      <Card className="p-0 overflow-hidden animate-fade-in-up" style={{ animationDelay: "200ms" }}>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-100">
+            <thead className="bg-gray-50/80 border-b border-gray-100/80">
               <tr>
-                <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="text-left py-3 px-4 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
                   Member
                 </th>
-                <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="text-left py-3 px-4 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
                   Email
                 </th>
-                <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="text-left py-3 px-4 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
                   Role
                 </th>
-                <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="text-left py-3 px-4 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="text-left py-3 px-4 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
                   Joined
                 </th>
               </tr>
@@ -100,58 +102,58 @@ export default async function TeamPage() {
                 <tr
                   key={member.uid}
                   className={`transition-colors ${
-                    member.uid === session.uid ? "bg-indigo-50" : "hover:bg-gray-50"
+                    member.uid === session.uid ? "bg-indigo-50/40" : "hover:bg-gray-50/60"
                   }`}
                 >
-                  <td className="py-3 px-4">
+                  <td className="py-3.5 px-4">
                     <div className="flex items-center gap-3">
                       {member.photoURL ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img
                           src={member.photoURL}
                           alt={member.displayName || ""}
-                          className="w-8 h-8 rounded-full"
+                          className="w-9 h-9 rounded-xl border border-gray-100 object-cover"
                         />
                       ) : (
-                        <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-700">
+                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-50 flex items-center justify-center text-xs font-bold text-indigo-700">
                           {(member.displayName || member.email || "?")
                             .charAt(0)
                             .toUpperCase()}
                         </div>
                       )}
                       <div>
-                        <p className="font-medium text-gray-900">
+                        <p className="font-medium text-gray-900 tracking-tight">
                           {member.displayName || "Unknown"}
                           {member.uid === session.uid && (
-                            <span className="ml-1 text-xs text-indigo-600">
-                              (you)
+                            <span className="ml-1.5 text-[10px] text-indigo-500 font-semibold px-1.5 py-px rounded-md bg-indigo-50 border border-indigo-200/40">
+                              you
                             </span>
                           )}
                         </p>
                       </div>
                     </div>
                   </td>
-                  <td className="py-3 px-4 text-gray-600">{member.email}</td>
-                  <td className="py-3 px-4">
+                  <td className="py-3.5 px-4 text-gray-500">{member.email}</td>
+                  <td className="py-3.5 px-4">
                     <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                        roleColors[member.role] || "bg-gray-100 text-gray-700"
+                      className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[11px] font-medium capitalize border ${
+                        roleColors[member.role] || "bg-gray-50 text-gray-500 border-gray-200/60"
                       }`}
                     >
                       {member.role}
                     </span>
                   </td>
-                  <td className="py-3 px-4">
+                  <td className="py-3.5 px-4">
                     <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                      className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[11px] font-medium capitalize border ${
                         statusColors[member.status] ||
-                        "bg-gray-100 text-gray-700"
+                        "bg-gray-50 text-gray-500 border-gray-200/60"
                       }`}
                     >
                       {member.status}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-gray-500 text-xs">
+                  <td className="py-3.5 px-4 text-gray-400 text-xs">
                     {formatDate(member.approvedAt || member.requestedAt)}
                   </td>
                 </tr>

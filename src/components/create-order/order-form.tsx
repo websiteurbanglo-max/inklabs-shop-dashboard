@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,7 +28,6 @@ interface PriceResult {
 export default function OrderForm({ platformConfig }: OrderFormProps) {
   const router = useRouter();
 
-  // Form state
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<number | null>(null);
   const [quantity, setQuantity] = useState(1);
@@ -35,16 +35,13 @@ export default function OrderForm({ platformConfig }: OrderFormProps) {
   const [customerEmail, setCustomerEmail] = useState("");
   const [notes, setNotes] = useState("");
 
-  // Pricing state
   const [priceResult, setPriceResult] = useState<PriceResult | null>(null);
   const [pricingError, setPricingError] = useState<string | null>(null);
   const [calculatingPrice, setCalculatingPrice] = useState(false);
 
-  // Submission state
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  // Get variant group for selected size
   const getVariantGroup = (size: number): string | null => {
     for (const group of platformConfig.variantGroups) {
       if (group.sizes.includes(size)) {
@@ -54,7 +51,6 @@ export default function OrderForm({ platformConfig }: OrderFormProps) {
     return null;
   };
 
-  // Calculate price when size/quantity changes
   const calculatePrice = useCallback(
     async (size: number | null, qty: number) => {
       if (!size || !qty) return;
@@ -154,34 +150,26 @@ export default function OrderForm({ platformConfig }: OrderFormProps) {
   const canSubmit =
     !!uploadedUrl && !!selectedSize && quantity >= 1 && !!priceResult;
 
-  // All sizes from variant groups
-  const allSizes = platformConfig.variantGroups.flatMap((g) => g.sizes);
   const quantityPresets = [1, 5, 10, 25, 50, 100];
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-2xl space-y-6 stagger-children">
       {/* Step 1: Upload Design */}
       <Card className="p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
-            1
+          <div className={cn(
+            "w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0 transition-all duration-300",
+            uploadedUrl
+              ? "bg-emerald-500 text-white"
+              : "bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-sm shadow-indigo-200/50"
+          )}>
+            {uploadedUrl ? (
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+              </svg>
+            ) : "1"}
           </div>
-          <h2 className="font-semibold text-gray-900">Upload Design</h2>
-          {uploadedUrl && (
-            <svg
-              className="w-5 h-5 text-green-500 ml-auto"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M5 13l4 4L19 7"
-              />
-            </svg>
-          )}
+          <h2 className="font-semibold text-gray-900 tracking-tight">Upload Design</h2>
         </div>
         <FileUpload
           accept="image/png,image/jpeg"
@@ -195,30 +183,36 @@ export default function OrderForm({ platformConfig }: OrderFormProps) {
       {/* Step 2: Select Size */}
       <Card className="p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div
-            className={`w-7 h-7 rounded-full text-white flex items-center justify-center text-sm font-bold flex-shrink-0 ${
-              selectedSize ? "bg-green-500" : "bg-indigo-600"
-            }`}
-          >
-            {selectedSize ? "✓" : "2"}
+          <div className={cn(
+            "w-8 h-8 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0 transition-all duration-300",
+            selectedSize
+              ? "bg-emerald-500 text-white"
+              : "bg-gradient-to-br from-indigo-500 to-indigo-600 text-white shadow-sm shadow-indigo-200/50"
+          )}>
+            {selectedSize ? (
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+              </svg>
+            ) : "2"}
           </div>
-          <h2 className="font-semibold text-gray-900">Select Size</h2>
+          <h2 className="font-semibold text-gray-900 tracking-tight">Select Size</h2>
         </div>
 
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
           {platformConfig.variantGroups.map((group) => (
             <div key={group.key} className="space-y-2">
-              <p className="text-xs font-medium text-gray-500">{group.label}</p>
+              <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">{group.label}</p>
               <div className="grid grid-cols-2 gap-2">
                 {group.sizes.map((size) => (
                   <button
                     key={size}
                     onClick={() => handleSizeSelect(size)}
-                    className={`p-2 rounded-lg border-2 text-sm font-medium transition-all ${
+                    className={cn(
+                      "p-2.5 rounded-xl border-2 text-sm font-medium transition-all duration-200 active:scale-95",
                       selectedSize === size
-                        ? "border-indigo-600 bg-indigo-50 text-indigo-700"
-                        : "border-gray-100 hover:border-gray-300 text-gray-700"
-                    }`}
+                        ? "border-indigo-500 bg-indigo-50 text-indigo-700 shadow-sm shadow-indigo-200/50"
+                        : "border-gray-100 hover:border-gray-200 text-gray-600 hover:bg-gray-50"
+                    )}
                   >
                     {size}&quot;
                   </button>
@@ -232,10 +226,10 @@ export default function OrderForm({ platformConfig }: OrderFormProps) {
       {/* Step 3: Quantity */}
       <Card className="p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white flex items-center justify-center text-sm font-bold flex-shrink-0 shadow-sm shadow-indigo-200/50">
             3
           </div>
-          <h2 className="font-semibold text-gray-900">Enter Quantity</h2>
+          <h2 className="font-semibold text-gray-900 tracking-tight">Enter Quantity</h2>
         </div>
 
         {/* Presets */}
@@ -244,11 +238,12 @@ export default function OrderForm({ platformConfig }: OrderFormProps) {
             <button
               key={preset}
               onClick={() => handleQuantityChange(preset)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
+              className={cn(
+                "px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 border active:scale-95",
                 quantity === preset
-                  ? "bg-indigo-600 text-white border-indigo-600"
-                  : "bg-white text-gray-700 border-gray-200 hover:border-indigo-300"
-              }`}
+                  ? "bg-gradient-to-b from-indigo-500 to-indigo-600 text-white border-indigo-600/20 shadow-sm shadow-indigo-200/50"
+                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+              )}
             >
               {preset}
             </button>
@@ -260,7 +255,7 @@ export default function OrderForm({ platformConfig }: OrderFormProps) {
           <button
             onClick={() => handleQuantityChange(quantity - 1)}
             disabled={quantity <= 1}
-            className="w-10 h-10 rounded-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:border-gray-300 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 active:scale-95"
           >
             −
           </button>
@@ -271,11 +266,11 @@ export default function OrderForm({ platformConfig }: OrderFormProps) {
             onChange={(e) =>
               handleQuantityChange(parseInt(e.target.value, 10) || 1)
             }
-            className="w-20 text-center px-3 py-2 border border-gray-200 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="w-20 text-center px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 tabular-nums"
           />
           <button
             onClick={() => handleQuantityChange(quantity + 1)}
-            className="w-10 h-10 rounded-lg border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50"
+            className="w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:border-gray-300 transition-all duration-200 active:scale-95"
           >
             +
           </button>
@@ -284,53 +279,54 @@ export default function OrderForm({ platformConfig }: OrderFormProps) {
 
       {/* Step 4: Price Preview */}
       {(selectedSize && quantity >= 1) && (
-        <Card className="p-6">
+        <Card className="p-6 animate-fade-in-up">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white flex items-center justify-center text-sm font-bold flex-shrink-0 shadow-sm shadow-indigo-200/50">
               4
             </div>
-            <h2 className="font-semibold text-gray-900">Pricing</h2>
+            <h2 className="font-semibold text-gray-900 tracking-tight">Pricing</h2>
           </div>
 
           {calculatingPrice ? (
             <div className="flex items-center gap-2 text-gray-400">
               <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
               </svg>
               <span className="text-sm">Calculating price...</span>
             </div>
           ) : pricingError ? (
-            <div className="p-4 bg-amber-50 border border-amber-100 rounded-lg">
+            <div className="p-4 bg-amber-50/60 border border-amber-100 rounded-xl">
               <p className="text-sm text-amber-800">{pricingError}</p>
             </div>
           ) : priceResult ? (
-            <div className="space-y-3">
+            <div className="space-y-3 animate-fade-in-up">
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Unit Price</span>
-                <span className="text-gray-900">
+                <span className="text-gray-400">Unit Price</span>
+                <span className="text-gray-900 tabular-nums">
                   {formatCurrency(priceResult.unitPrice)}
                 </span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Quantity</span>
-                <span className="text-gray-900">×{quantity}</span>
+                <span className="text-gray-400">Quantity</span>
+                <span className="text-gray-900 tabular-nums">&times;{quantity}</span>
               </div>
               <div className="flex justify-between pt-3 border-t border-gray-100">
                 <span className="font-semibold text-gray-800">
                   Estimated Total
                 </span>
-                <span className="text-2xl font-bold text-indigo-600">
+                <span className="text-2xl font-bold text-indigo-600 tabular-nums">
                   {formatCurrency(priceResult.total)}
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <span
-                  className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                  className={cn(
+                    "text-[11px] px-2 py-0.5 rounded-lg font-medium border",
                     priceResult.ruleSource === "shop"
-                      ? "bg-indigo-100 text-indigo-700"
-                      : "bg-gray-100 text-gray-600"
-                  }`}
+                      ? "bg-indigo-50 text-indigo-600 border-indigo-200/60"
+                      : "bg-gray-50 text-gray-500 border-gray-200/60"
+                  )}
                 >
                   {priceResult.ruleSource === "shop"
                     ? "Shop pricing"
@@ -345,12 +341,12 @@ export default function OrderForm({ platformConfig }: OrderFormProps) {
       {/* Step 5: Customer Details */}
       <Card className="p-6">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-7 h-7 rounded-full bg-indigo-600 text-white flex items-center justify-center text-sm font-bold flex-shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-indigo-600 text-white flex items-center justify-center text-sm font-bold flex-shrink-0 shadow-sm shadow-indigo-200/50">
             5
           </div>
-          <h2 className="font-semibold text-gray-900">
+          <h2 className="font-semibold text-gray-900 tracking-tight">
             Customer Details{" "}
-            <span className="text-gray-400 font-normal text-sm">(Optional)</span>
+            <span className="text-gray-300 font-normal text-sm">(Optional)</span>
           </h2>
         </div>
 
@@ -369,7 +365,7 @@ export default function OrderForm({ platformConfig }: OrderFormProps) {
             placeholder="customer@example.com"
           />
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">
               Notes
             </label>
             <textarea
@@ -377,7 +373,7 @@ export default function OrderForm({ platformConfig }: OrderFormProps) {
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Any special instructions..."
               rows={2}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
+              className="w-full px-3.5 py-2.5 border border-gray-200 rounded-xl text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 focus:shadow-[0_0_0_4px_rgba(79,70,229,0.08)] hover:border-gray-300 resize-none"
             />
           </div>
         </div>
@@ -394,7 +390,7 @@ export default function OrderForm({ platformConfig }: OrderFormProps) {
       </Button>
 
       {!canSubmit && (
-        <p className="text-xs text-gray-400 text-center">
+        <p className="text-[11px] text-gray-300 text-center">
           Please upload a design, select a size, and enter a quantity to
           continue.
         </p>
@@ -413,31 +409,31 @@ export default function OrderForm({ platformConfig }: OrderFormProps) {
             <img
               src={uploadedUrl}
               alt="Design preview"
-              className="w-full max-h-32 object-contain rounded-lg bg-gray-50 border border-gray-100"
+              className="w-full max-h-32 object-contain rounded-xl bg-gray-50 border border-gray-100"
             />
           )}
 
-          <div className="grid grid-cols-2 gap-2 text-sm">
+          <div className="grid grid-cols-2 gap-2.5 text-sm">
             <div>
-              <span className="text-gray-500">Size:</span>
-              <span className="ml-2 font-medium">{selectedSize}&quot; inches</span>
+              <span className="text-gray-400">Size:</span>
+              <span className="ml-2 font-medium text-gray-900">{selectedSize}&quot; inches</span>
             </div>
             <div>
-              <span className="text-gray-500">Quantity:</span>
-              <span className="ml-2 font-medium">{quantity}</span>
+              <span className="text-gray-400">Quantity:</span>
+              <span className="ml-2 font-medium text-gray-900 tabular-nums">{quantity}</span>
             </div>
             {customerName && (
               <div className="col-span-2">
-                <span className="text-gray-500">Customer:</span>
-                <span className="ml-2 font-medium">{customerName}</span>
+                <span className="text-gray-400">Customer:</span>
+                <span className="ml-2 font-medium text-gray-900">{customerName}</span>
               </div>
             )}
           </div>
 
           {priceResult && (
-            <div className="flex justify-between items-center p-3 bg-indigo-50 rounded-lg">
+            <div className="flex justify-between items-center p-3.5 bg-indigo-50/60 rounded-xl border border-indigo-100/60">
               <span className="text-sm font-medium text-gray-700">Total</span>
-              <span className="text-lg font-bold text-indigo-600">
+              <span className="text-lg font-bold text-indigo-600 tabular-nums">
                 {formatCurrency(priceResult.total)}
               </span>
             </div>

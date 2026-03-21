@@ -11,34 +11,51 @@ export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
     | "purple"
     | "shopify"
     | "studio";
+  dot?: boolean;
 }
 
 export function Badge({
   className,
   variant = "default",
+  dot,
   children,
   ...props
 }: BadgeProps) {
   const variants = {
-    default: "bg-gray-100 text-gray-700",
-    primary: "bg-indigo-100 text-indigo-700",
-    success: "bg-emerald-100 text-emerald-700",
-    warning: "bg-amber-100 text-amber-700",
-    danger: "bg-red-100 text-red-700",
-    purple: "bg-purple-100 text-purple-700",
-    shopify: "bg-green-100 text-green-700",
-    studio: "bg-purple-100 text-purple-700",
+    default: "bg-gray-50 text-gray-600 border-gray-200/60",
+    primary: "bg-indigo-50 text-indigo-700 border-indigo-200/60",
+    success: "bg-emerald-50 text-emerald-700 border-emerald-200/60",
+    warning: "bg-amber-50 text-amber-700 border-amber-200/60",
+    danger: "bg-red-50 text-red-700 border-red-200/60",
+    purple: "bg-purple-50 text-purple-700 border-purple-200/60",
+    shopify: "bg-emerald-50 text-emerald-700 border-emerald-200/60",
+    studio: "bg-purple-50 text-purple-700 border-purple-200/60",
+  };
+
+  const dotColors = {
+    default: "bg-gray-400",
+    primary: "bg-indigo-500",
+    success: "bg-emerald-500",
+    warning: "bg-amber-500",
+    danger: "bg-red-500",
+    purple: "bg-purple-500",
+    shopify: "bg-emerald-500",
+    studio: "bg-purple-500",
   };
 
   return (
     <span
       className={cn(
-        "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium",
+        "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-xs font-medium border",
+        "transition-colors duration-200",
         variants[variant],
         className
       )}
       {...props}
     >
+      {dot && (
+        <span className={cn("w-1.5 h-1.5 rounded-full", dotColors[variant])} />
+      )}
       {children}
     </span>
   );

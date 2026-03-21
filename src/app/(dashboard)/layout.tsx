@@ -29,7 +29,7 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+    <div className="flex h-screen bg-[#f8f9fb] overflow-hidden">
       {/* Sidebar */}
       <Sidebar role={shopContext.role} />
 
@@ -44,7 +44,7 @@ export default async function DashboardLayout({
 
         {/* Page content */}
         <main className="flex-1 overflow-y-auto">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
             {children}
           </div>
         </main>

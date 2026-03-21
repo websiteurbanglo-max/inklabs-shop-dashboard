@@ -20,7 +20,6 @@ export default async function PricingPage() {
     redirect("/dashboard");
   }
 
-  // Fetch variant groups from platform config
   let variantGroups: VariantGroupDef[] = [
     { key: "small", label: "Small (2-4 inch)", sizes: [2, 3, 4] },
     { key: "medium", label: "Medium (5-7 inch)", sizes: [5, 6, 7] },
@@ -39,7 +38,6 @@ export default async function PricingPage() {
     // use defaults
   }
 
-  // Fetch shop pricing rules
   let shopRules: PricingRule[] = [];
   try {
     const shopRulesSnap = await adminDb
@@ -57,7 +55,6 @@ export default async function PricingPage() {
     // no shop rules
   }
 
-  // Fetch global pricing rules
   let globalRules: PricingRule[] = [];
   try {
     const globalRulesSnap = await adminDb
@@ -73,7 +70,6 @@ export default async function PricingPage() {
     // no global rules
   }
 
-  // Merge rules: shop overrides take precedence
   const shopRuleMap = new Map(
     shopRules.map((r) => [`${r.variantGroup}-${r.minQty}-${r.maxQty}`, r])
   );
@@ -96,26 +92,28 @@ export default async function PricingPage() {
         description="View the effective pricing for your shop"
       />
 
-      <Card className="p-4 bg-indigo-50 border-indigo-100">
+      <Card className="p-4 bg-indigo-50/60 border-indigo-100/80 animate-fade-in-up" style={{ animationDelay: "100ms" }}>
         <div className="flex gap-3">
-          <svg
-            className="w-5 h-5 text-indigo-600 flex-shrink-0 mt-0.5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <div>
+          <div className="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center flex-shrink-0">
+            <svg
+              className="w-4 h-4 text-indigo-600"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <div className="pt-1">
             <p className="text-sm font-medium text-indigo-900">
               Read-only Pricing
             </p>
-            <p className="text-sm text-indigo-700 mt-0.5">
+            <p className="text-sm text-indigo-700/80 mt-0.5 leading-relaxed">
               These are the prices applied to your orders. Contact the platform
               administrator to request changes.
             </p>
@@ -123,10 +121,12 @@ export default async function PricingPage() {
         </div>
       </Card>
 
-      <PricingMatrix
-        effectiveRules={effectiveRules}
-        variantGroups={variantGroups}
-      />
+      <div className="animate-fade-in-up" style={{ animationDelay: "200ms" }}>
+        <PricingMatrix
+          effectiveRules={effectiveRules}
+          variantGroups={variantGroups}
+        />
+      </div>
     </div>
   );
 }

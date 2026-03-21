@@ -13,31 +13,32 @@ export default function PricingMatrix({
 }: PricingMatrixProps) {
   if (effectiveRules.length === 0) {
     return (
-      <Card className="p-12 text-center">
-        <svg
-          className="w-12 h-12 text-gray-300 mx-auto mb-3"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={1.5}
-            d="M9 8h6m-5 0a3 3 0 110 6H9l3 3m-3-6h6m6 1a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
+      <Card className="p-14 text-center">
+        <div className="w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center mx-auto mb-4">
+          <svg
+            className="w-8 h-8 text-gray-300"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={1.5}
+              d="M9 8h6m-5 0a3 3 0 110 6H9l3 3m-3-6h6m6 1a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        </div>
         <p className="text-gray-500 text-sm font-medium">
           No pricing rules configured
         </p>
-        <p className="text-gray-400 text-xs mt-1">
+        <p className="text-gray-300 text-xs mt-1">
           Contact the platform administrator to set up pricing.
         </p>
       </Card>
     );
   }
 
-  // Collect all unique quantity tiers
   const quantityTiers = Array.from(
     new Set(effectiveRules.map((r) => `${r.minQty}-${r.maxQty}`))
   )
@@ -47,7 +48,6 @@ export default function PricingMatrix({
     })
     .sort((a, b) => a.min - b.min);
 
-  // Build a lookup map: variantGroup -> qty tier -> rule
   const ruleMap = new Map<string, Map<string, EffectivePricingRule>>();
 
   for (const rule of effectiveRules) {
@@ -63,27 +63,27 @@ export default function PricingMatrix({
       {/* Legend */}
       <div className="flex items-center gap-4 text-xs">
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm bg-indigo-100 border border-indigo-200" />
-          <span className="text-gray-600">Custom pricing for your shop</span>
+          <div className="w-3 h-3 rounded-sm bg-indigo-50 border border-indigo-200/60" />
+          <span className="text-gray-500">Custom pricing for your shop</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded-sm bg-gray-100 border border-gray-200" />
-          <span className="text-gray-600">Standard platform pricing</span>
+          <div className="w-3 h-3 rounded-sm bg-gray-50 border border-gray-200/60" />
+          <span className="text-gray-500">Standard platform pricing</span>
         </div>
       </div>
 
       <Card className="p-0 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-100">
+            <thead className="bg-gray-50/80 border-b border-gray-100/80">
               <tr>
-                <th className="text-left py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                <th className="text-left py-3 px-4 text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
                   Variant Group / Size
                 </th>
                 {quantityTiers.map((tier) => (
                   <th
                     key={`${tier.min}-${tier.max}`}
-                    className="text-center py-3 px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+                    className="text-center py-3 px-4 text-[11px] font-semibold text-gray-400 uppercase tracking-wider"
                   >
                     Qty {tier.label}
                   </th>
@@ -94,10 +94,10 @@ export default function PricingMatrix({
               {variantGroups.map((group) => {
                 const groupRules = ruleMap.get(group.key);
                 return (
-                  <tr key={group.key}>
-                    <td className="py-3 px-4">
-                      <p className="font-medium text-gray-900">{group.label}</p>
-                      <p className="text-xs text-gray-400">
+                  <tr key={group.key} className="hover:bg-gray-50/40 transition-colors">
+                    <td className="py-3.5 px-4">
+                      <p className="font-medium text-gray-900 tracking-tight">{group.label}</p>
+                      <p className="text-[11px] text-gray-300">
                         {group.sizes.join(", ")}&quot; inch
                         {group.sizes.length !== 1 ? "es" : ""}
                       </p>
@@ -108,23 +108,23 @@ export default function PricingMatrix({
                       return (
                         <td
                           key={tierKey}
-                          className="py-3 px-4 text-center"
+                          className="py-3.5 px-4 text-center"
                         >
                           {rule ? (
                             <div
-                              className={`inline-block px-2.5 py-1 rounded-lg text-sm font-medium ${
+                              className={`inline-block px-2.5 py-1 rounded-lg text-sm font-medium border ${
                                 rule.source === "shop"
-                                  ? "bg-indigo-100 text-indigo-800"
-                                  : "bg-gray-100 text-gray-700"
+                                  ? "bg-indigo-50 text-indigo-700 border-indigo-200/60"
+                                  : "bg-gray-50 text-gray-600 border-gray-200/60"
                               }`}
                             >
                               {formatCurrency(rule.unitPrice)}
-                              <span className="text-xs font-normal ml-0.5">
+                              <span className="text-[11px] font-normal ml-0.5 opacity-60">
                                 /pc
                               </span>
                             </div>
                           ) : (
-                            <span className="text-gray-300 text-xs">—</span>
+                            <span className="text-gray-200 text-xs">—</span>
                           )}
                         </td>
                       );
@@ -137,7 +137,7 @@ export default function PricingMatrix({
         </div>
       </Card>
 
-      <p className="text-xs text-gray-400">
+      <p className="text-[11px] text-gray-300">
         Prices shown are per piece (unit price). All amounts in Indian Rupees
         (INR).
       </p>

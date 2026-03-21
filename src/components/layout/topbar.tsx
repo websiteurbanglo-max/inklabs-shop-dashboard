@@ -44,7 +44,6 @@ export default function Topbar({ shopDisplayName, shopId, role }: TopbarProps) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
-      // Full page reload to clear all client state (SWR cache, etc.)
       window.location.href = "/login";
     } catch {
       toast.error("Sign out failed");
@@ -53,37 +52,37 @@ export default function Topbar({ shopDisplayName, shopId, role }: TopbarProps) {
   };
 
   const roleColors: Record<MemberRole, string> = {
-    owner: "bg-purple-100 text-purple-700",
-    admin: "bg-blue-100 text-blue-700",
-    operator: "bg-green-100 text-green-700",
-    viewer: "bg-gray-100 text-gray-600",
+    owner: "bg-purple-50 text-purple-600 border-purple-200/60",
+    admin: "bg-blue-50 text-blue-600 border-blue-200/60",
+    operator: "bg-emerald-50 text-emerald-600 border-emerald-200/60",
+    viewer: "bg-gray-50 text-gray-500 border-gray-200/60",
   };
 
   const shopTypeLabel =
     userInfo?.shopType === "shopify" ? "Shopify" : "Studio";
 
   return (
-    <header className="h-16 bg-white border-b border-gray-100 flex items-center justify-between px-4 sm:px-6 flex-shrink-0">
+    <header className="h-16 glass-subtle border-b border-gray-100/60 flex items-center justify-between px-4 sm:px-6 flex-shrink-0 sticky top-0 z-10">
       {/* Left: Shop info */}
-      <div className="flex items-center gap-3 min-w-0">
+      <div className="flex items-center gap-3 min-w-0 animate-fade-in">
         <div className="min-w-0">
-          <h2 className="text-sm font-semibold text-gray-900 truncate">
+          <h2 className="text-sm font-semibold text-gray-900 truncate tracking-tight">
             {shopDisplayName}
           </h2>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 mt-0.5">
             <span
               className={cn(
-                "text-xs px-1.5 py-0.5 rounded-full font-medium",
+                "text-[10px] px-1.5 py-px rounded-md font-medium border",
                 userInfo?.shopType === "shopify"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-purple-100 text-purple-700"
+                  ? "bg-emerald-50 text-emerald-600 border-emerald-200/60"
+                  : "bg-purple-50 text-purple-600 border-purple-200/60"
               )}
             >
               {shopTypeLabel}
             </span>
             <span
               className={cn(
-                "text-xs px-1.5 py-0.5 rounded-full font-medium",
+                "text-[10px] px-1.5 py-px rounded-md font-medium border capitalize",
                 roleColors[role]
               )}
             >
@@ -98,7 +97,13 @@ export default function Topbar({ shopDisplayName, shopId, role }: TopbarProps) {
         {/* Switch shop */}
         <Link
           href="/select-shop"
-          className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors border border-gray-100"
+          className={cn(
+            "hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5",
+            "text-xs font-medium text-gray-500 bg-gray-50/80",
+            "hover:bg-gray-100 hover:text-gray-700",
+            "rounded-xl transition-all duration-200 border border-gray-100",
+            "active:scale-[0.97]"
+          )}
         >
           <svg
             className="w-3.5 h-3.5"
@@ -113,20 +118,23 @@ export default function Topbar({ shopDisplayName, shopId, role }: TopbarProps) {
               d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"
             />
           </svg>
-          Switch Shop
+          Switch
         </Link>
 
+        {/* Divider */}
+        <div className="hidden sm:block w-px h-6 bg-gray-200/60 mx-1" />
+
         {/* User avatar + sign out */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           {userInfo?.photoURL ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={userInfo.photoURL}
               alt={userInfo.displayName || ""}
-              className="w-8 h-8 rounded-full border border-gray-200"
+              className="w-8 h-8 rounded-xl border border-gray-200/60 shadow-sm object-cover"
             />
           ) : (
-            <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-xs font-bold text-indigo-700">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-50 flex items-center justify-center text-xs font-bold text-indigo-600 border border-indigo-200/40">
               {(userInfo?.displayName || userInfo?.email || "U")
                 .charAt(0)
                 .toUpperCase()}
@@ -134,7 +142,7 @@ export default function Topbar({ shopDisplayName, shopId, role }: TopbarProps) {
           )}
 
           <div className="hidden sm:block min-w-0">
-            <p className="text-xs font-medium text-gray-900 truncate max-w-32">
+            <p className="text-xs font-medium text-gray-800 truncate max-w-32">
               {userInfo?.displayName || userInfo?.email || "..."}
             </p>
           </div>
@@ -142,22 +150,33 @@ export default function Topbar({ shopDisplayName, shopId, role }: TopbarProps) {
           <button
             onClick={handleSignOut}
             disabled={signingOut}
-            className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+            className={cn(
+              "p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100",
+              "rounded-xl transition-all duration-200 disabled:opacity-50",
+              "active:scale-95"
+            )}
             title="Sign out"
           >
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              />
-            </svg>
+            {signingOut ? (
+              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+            ) : (
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                />
+              </svg>
+            )}
           </button>
         </div>
       </div>
