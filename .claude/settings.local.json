@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p /Users/baba/Downloads/inklabs/shop-dashboard/shop-dashboard/src/app/\\\\\\(auth\\\\\\)/login)",
+      "Bash(mkdir -p /Users/baba/Downloads/inklabs/shop-dashboard/shop-dashboard/src/app/\\\\\\(auth\\\\\\)/onboarding)",
+      "Bash(mkdir -p /Users/baba/Downloads/inklabs/shop-dashboard/shop-dashboard/src/app/\\\\\\(auth\\\\\\)/pending)",
+      "Bash(mkdir -p /Users/baba/Downloads/inklabs/shop-dashboard/shop-dashboard/src/app/\\\\\\(auth\\\\\\)/select-shop)",
+      "Bash(mkdir -p /Users/baba/Downloads/inklabs/shop-dashboard/shop-dashboard/src/app/\\\\\\(dashboard\\\\\\)/dashboard)"
+    ]
+  }
+}
