@@ -35,7 +35,15 @@ export default async function CreateOrderPage() {
       .doc("settings")
       .get();
     if (configDoc.exists) {
-      platformConfig = { ...platformConfig, ...configDoc.data() } as PlatformConfig;
+      const data = configDoc.data();
+      // Only extract serializable fields — Firestore Timestamps (updatedAt etc.)
+      // cannot be passed as props to client components
+      if (data?.variantGroups) {
+        platformConfig.variantGroups = data.variantGroups;
+      }
+      if (data?.defaultPipelineId) {
+        platformConfig.defaultPipelineId = data.defaultPipelineId;
+      }
     }
   } catch {
     // Use defaults if fetch fails

@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["firebase-admin", "@opentelemetry/api"],
+  serverExternalPackages: ["firebase-admin", "@opentelemetry/api", "uuid"],
   images: {
     remotePatterns: [
       {
