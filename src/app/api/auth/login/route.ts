@@ -58,6 +58,7 @@ export async function POST(request: NextRequest) {
     const memberships: ShopMembership[] = [];
     for (const doc of memberDocs) {
       const data = doc.data();
+      if (!data) continue;
       // doc.ref.parent.parent is the shop document
       const shopRef = doc.ref.parent.parent;
       if (!shopRef) continue;

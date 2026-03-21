@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Card } from "@/components/ui/card";
@@ -9,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import type { ShopMembership } from "@/models/types";
 
 export default function PendingApproval() {
-  const router = useRouter();
   const [memberships, setMemberships] = useState<ShopMembership[]>([]);
   const [loading, setLoading] = useState(true);
   const [checking, setChecking] = useState(false);
@@ -42,15 +40,25 @@ export default function PendingApproval() {
       if (activeMemberships.length > 0) {
         toast.success("Your access has been approved!");
         if (activeMemberships.length === 1) {
-          router.push("/dashboard");
+          // Set shop context cookie before redirecting
+          try {
+            await fetch("/api/auth/select-shop", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ shopId: activeMemberships[0].shopId }),
+            });
+          } catch {
+            // If select-shop fails, redirect to select-shop page instead
+          }
+          window.location.href = "/dashboard";
         } else {
-          router.push("/select-shop");
+          window.location.href = "/select-shop";
         }
       }
     }, 30000);
 
     return () => clearInterval(interval);
-  }, [fetchMemberships, router]);
+  }, [fetchMemberships]);
 
   const handleCheckStatus = async () => {
     setChecking(true);
@@ -67,9 +75,19 @@ export default function PendingApproval() {
       if (activeMemberships.length > 0) {
         toast.success("Your access has been approved!");
         if (activeMemberships.length === 1) {
-          router.push("/dashboard");
+          // Set shop context cookie before redirecting
+          try {
+            await fetch("/api/auth/select-shop", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ shopId: activeMemberships[0].shopId }),
+            });
+          } catch {
+            // If select-shop fails, redirect to select-shop page instead
+          }
+          window.location.href = "/dashboard";
         } else {
-          router.push("/select-shop");
+          window.location.href = "/select-shop";
         }
       } else {
         setMessage("Still waiting for approval. We'll notify you when it's ready.");
@@ -82,8 +100,11 @@ export default function PendingApproval() {
   };
 
   const handleSignOut = async () => {
-    await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/login");
+    await fetch("/api/auth/logout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    window.location.href = "/login";
   };
 
   const pendingMemberships = memberships.filter((m) => m.status === "pending");

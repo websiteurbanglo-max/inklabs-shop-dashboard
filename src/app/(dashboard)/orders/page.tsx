@@ -59,9 +59,7 @@ export default async function OrdersPage({
       .where("currentStageKey", "==", stage)
       .orderBy("createdAt", "desc")
       .limit(25) as typeof query;
-  }
-
-  if (source === "shopify" || source === "studio") {
+  } else if (source === "shopify" || source === "studio") {
     query = adminDb
       .collection("shops")
       .doc(session.shopId)

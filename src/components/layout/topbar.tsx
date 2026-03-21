@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { MemberRole } from "@/models/types";
@@ -14,7 +13,6 @@ interface TopbarProps {
 }
 
 export default function Topbar({ shopDisplayName, shopId, role }: TopbarProps) {
-  const router = useRouter();
   const [userInfo, setUserInfo] = useState<{
     displayName?: string;
     email?: string;
@@ -42,8 +40,12 @@ export default function Topbar({ shopDisplayName, shopId, role }: TopbarProps) {
   const handleSignOut = async () => {
     setSigningOut(true);
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
-      router.push("/login");
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      });
+      // Full page reload to clear all client state (SWR cache, etc.)
+      window.location.href = "/login";
     } catch {
       toast.error("Sign out failed");
       setSigningOut(false);

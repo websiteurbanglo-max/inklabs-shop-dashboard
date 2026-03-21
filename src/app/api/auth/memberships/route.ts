@@ -37,6 +37,7 @@ export async function GET() {
 
     for (const doc of membershipDocs) {
       const data = doc.data();
+      if (!data) continue;
       const shopRef = doc.ref.parent.parent;
       if (!shopRef) continue;
 

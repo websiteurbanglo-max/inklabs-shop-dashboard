@@ -1,6 +1,7 @@
+import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
     const cookieStore = await cookies();
 
@@ -21,6 +22,12 @@ export async function POST() {
       maxAge: 0,
       path: "/",
     });
+
+    // If this is a form submission (not a fetch API call), redirect to login
+    const contentType = request.headers.get("content-type") || "";
+    if (!contentType.includes("application/json")) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
 
     return Response.json({ success: true });
   } catch (error) {
