@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { adminDb } from "@/lib/firebase-admin";
 import { adminAuth } from "@/lib/firebase-admin";
-import { verifyShopUser } from "@/lib/auth";
+import { getShopSession } from "@/lib/auth";
 import { formatCurrency, formatRelativeTime } from "@/lib/utils";
 import PageHeader from "@/components/layout/page-header";
 import { Card } from "@/components/ui/card";
@@ -80,7 +80,7 @@ const stageColors: Record<string, string> = {
 export default async function DashboardPage() {
   let session;
   try {
-    session = await verifyShopUser();
+    session = await getShopSession();
   } catch {
     redirect("/login");
   }

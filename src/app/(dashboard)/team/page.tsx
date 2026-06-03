@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { verifyShopUser, requireRole } from "@/lib/auth";
+import { getShopSession, requireRole } from "@/lib/auth";
 import { adminDb } from "@/lib/firebase-admin";
 import PageHeader from "@/components/layout/page-header";
 import { Card } from "@/components/ui/card";
@@ -27,7 +27,7 @@ const statusColors: Record<string, string> = {
 export default async function TeamPage() {
   let session;
   try {
-    session = await verifyShopUser();
+    session = await getShopSession();
     requireRole(session, "admin");
   } catch {
     redirect("/dashboard");

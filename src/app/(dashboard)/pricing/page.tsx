@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { verifyShopUser, requireRole } from "@/lib/auth";
+import { getShopSession, requireRole } from "@/lib/auth";
 import { adminDb } from "@/lib/firebase-admin";
 import PageHeader from "@/components/layout/page-header";
 import PricingMatrix from "@/components/pricing/pricing-matrix";
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default async function PricingPage() {
   let session;
   try {
-    session = await verifyShopUser();
+    session = await getShopSession();
     requireRole(session, "admin");
   } catch {
     redirect("/dashboard");

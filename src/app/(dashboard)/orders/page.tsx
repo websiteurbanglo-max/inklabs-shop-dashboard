@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { verifyShopUser } from "@/lib/auth";
+import { getShopSession } from "@/lib/auth";
 import { adminDb } from "@/lib/firebase-admin";
 import { formatCurrency, formatRelativeTime } from "@/lib/utils";
 import PageHeader from "@/components/layout/page-header";
@@ -36,7 +36,7 @@ export default async function OrdersPage({
 }) {
   let session;
   try {
-    session = await verifyShopUser();
+    session = await getShopSession();
   } catch {
     redirect("/login");
   }

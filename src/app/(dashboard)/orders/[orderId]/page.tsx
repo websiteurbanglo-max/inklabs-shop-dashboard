@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import { verifyShopUser } from "@/lib/auth";
+import { getShopSession } from "@/lib/auth";
 import { adminDb } from "@/lib/firebase-admin";
 import { formatCurrency, formatDate, formatRelativeTime } from "@/lib/utils";
 import PageHeader from "@/components/layout/page-header";
@@ -45,19 +45,29 @@ export default async function OrderDetailPage({
 }) {
   let session;
   try {
-    session = await verifyShopUser();
+    session = await getShopSession();
   } catch {
     redirect("/login");
   }
 
   const { orderId } = await params;
 
-  const orderDoc = await adminDb
-    .collection("shops")
-    .doc(session.shopId)
-    .collection("orders")
-    .doc(orderId)
-    .get();
+  const [orderDoc, eventsSnap] = await Promise.all([
+    adminDb
+      .collection("shops")
+      .doc(session.shopId)
+      .collection("orders")
+      .doc(orderId)
+      .get(),
+    adminDb
+      .collection("shops")
+      .doc(session.shopId)
+      .collection("orders")
+      .doc(orderId)
+      .collection("events")
+      .orderBy("timestamp", "desc")
+      .get(),
+  ]);
 
   if (!orderDoc.exists) {
     notFound();
@@ -68,15 +78,6 @@ export default async function OrderDetailPage({
   if (order.shopId && order.shopId !== session.shopId) {
     notFound();
   }
-
-  const eventsSnap = await adminDb
-    .collection("shops")
-    .doc(session.shopId)
-    .collection("orders")
-    .doc(orderId)
-    .collection("events")
-    .orderBy("timestamp", "desc")
-    .get();
 
   const events = eventsSnap.docs.map((doc) => ({
     ...doc.data(),

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { adminAuth, adminDb } from "./firebase-admin";
 import type { ShopSession } from "@/models/types";
@@ -12,10 +13,15 @@ export class AuthError extends Error {
   }
 }
 
-export async function verifyShopUser(): Promise<ShopSession> {
+/**
+ * Fast session read for Server Component page renders.
+ * Validates the JWT locally (no network). Trusts the __shop_context cookie
+ * that was written at login time and is guarded by the middleware.
+ * Memoized per request via React cache().
+ */
+export const getShopSession = cache(async (): Promise<ShopSession> => {
   const cookieStore = await cookies();
 
-  // 1. Verify Firebase session cookie
   const sessionCookie = cookieStore.get("__session")?.value;
   if (!sessionCookie) {
     throw new AuthError("Not authenticated", 401);
@@ -23,12 +29,12 @@ export async function verifyShopUser(): Promise<ShopSession> {
 
   let decoded;
   try {
+    // false = local JWT verification only, no revocation network call
     decoded = await adminAuth.verifySessionCookie(sessionCookie, false);
   } catch {
     throw new AuthError("Invalid or expired session", 401);
   }
 
-  // 2. Read shop context
   const shopContextRaw = cookieStore.get("__shop_context")?.value;
   if (!shopContextRaw) {
     throw new AuthError("No shop selected", 401);
@@ -41,28 +47,36 @@ export async function verifyShopUser(): Promise<ShopSession> {
     throw new AuthError("Invalid shop context", 401);
   }
 
-  const { shopId, shopDisplayName } = shopContext;
+  return {
+    uid: decoded.uid,
+    email: decoded.email!,
+    shopId: shopContext.shopId,
+    role: shopContext.role as ShopSession["role"],
+    shopDisplayName: shopContext.shopDisplayName,
+  };
+});
 
-  // 3. Verify membership is still active (re-check on every request)
+/**
+ * Full verification for API route handlers (writes / sensitive reads).
+ * Adds a Firestore membership check to confirm the user is still active.
+ */
+export async function verifyShopUser(): Promise<ShopSession> {
+  const session = await getShopSession();
+
   const memberDoc = await adminDb
     .collection("shops")
-    .doc(shopId)
+    .doc(session.shopId)
     .collection("members")
-    .doc(decoded.uid)
+    .doc(session.uid)
     .get();
 
   if (!memberDoc.exists || memberDoc.data()?.status !== "active") {
     throw new AuthError("Membership is not active", 403);
   }
 
-  const memberData = memberDoc.data()!;
-
   return {
-    uid: decoded.uid,
-    email: decoded.email!,
-    shopId,
-    role: memberData.role as ShopSession["role"],
-    shopDisplayName,
+    ...session,
+    role: memberDoc.data()!.role as ShopSession["role"],
   };
 }
 
@@ -99,7 +113,7 @@ export async function verifySessionOnly(): Promise<{
   }
 
   try {
-    const decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
+    const decoded = await adminAuth.verifySessionCookie(sessionCookie, false);
     return {
       uid: decoded.uid,
       email: decoded.email!,

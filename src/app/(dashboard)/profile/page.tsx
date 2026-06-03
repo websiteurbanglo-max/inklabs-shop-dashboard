@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { verifyShopUser } from "@/lib/auth";
+import { getShopSession } from "@/lib/auth";
 import { adminDb, adminAuth } from "@/lib/firebase-admin";
 import PageHeader from "@/components/layout/page-header";
 import { Card } from "@/components/ui/card";
@@ -21,44 +21,30 @@ const roleColors: Record<string, string> = {
 export default async function ProfilePage() {
   let session;
   try {
-    session = await verifyShopUser();
+    session = await getShopSession();
   } catch {
     redirect("/login");
   }
 
-  const shopDoc = await adminDb
-    .collection("shops")
-    .doc(session.shopId)
-    .get();
+  const [shopDoc, memberDoc, userRecord] = await Promise.all([
+    adminDb.collection("shops").doc(session.shopId).get(),
+    adminDb
+      .collection("shops")
+      .doc(session.shopId)
+      .collection("members")
+      .doc(session.uid)
+      .get(),
+    adminAuth.getUser(session.uid).catch(() => null),
+  ]);
 
   if (!shopDoc.exists) {
     redirect("/login");
   }
 
   const shop = { ...shopDoc.data(), shopId: shopDoc.id } as Shop;
-
-  const memberDoc = await adminDb
-    .collection("shops")
-    .doc(session.shopId)
-    .collection("members")
-    .doc(session.uid)
-    .get();
-
   const member = memberDoc.exists
     ? ({ ...memberDoc.data(), uid: memberDoc.id, shopId: session.shopId } as ShopMember)
     : null;
-
-  let userRecord: { displayName?: string; email?: string; photoURL?: string } = {};
-  try {
-    const record = await adminAuth.getUser(session.uid);
-    userRecord = {
-      displayName: record.displayName,
-      email: record.email,
-      photoURL: record.photoURL,
-    };
-  } catch {
-    // ignore
-  }
 
   const canEdit =
     session.role === "admin" || session.role === "owner";
@@ -188,23 +174,23 @@ export default async function ProfilePage() {
           Your Account
         </h2>
         <div className="flex items-center gap-4 mb-5">
-          {userRecord.photoURL ? (
+          {userRecord?.photoURL ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={userRecord.photoURL}
-              alt={userRecord.displayName || ""}
+              src={userRecord?.photoURL}
+              alt={userRecord?.displayName || ""}
               className="w-14 h-14 rounded-2xl border border-gray-100 shadow-sm object-cover"
             />
           ) : (
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-100 to-indigo-50 flex items-center justify-center text-xl font-bold text-indigo-700 shadow-sm">
-              {(userRecord.displayName || session.email)
+              {(userRecord?.displayName || session.email)
                 ?.charAt(0)
                 ?.toUpperCase()}
             </div>
           )}
           <div>
             <p className="font-semibold text-gray-900 tracking-tight text-lg">
-              {userRecord.displayName || "—"}
+              {userRecord?.displayName || "—"}
             </p>
             <p className="text-sm text-gray-400">{session.email}</p>
           </div>

@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { verifyShopUser, requireRole } from "@/lib/auth";
+import { getShopSession, requireRole } from "@/lib/auth";
 import { adminDb } from "@/lib/firebase-admin";
 import PageHeader from "@/components/layout/page-header";
 import OrderForm from "@/components/create-order/order-form";
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default async function CreateOrderPage() {
   let session;
   try {
-    session = await verifyShopUser();
+    session = await getShopSession();
     requireRole(session, "operator");
   } catch {
     redirect("/orders");
