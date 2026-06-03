@@ -1,25 +1,23 @@
 "use client";
 
 import useSWR from "swr";
-import type { Order } from "@/models/types";
+import useSWRInfinite from "swr/infinite";
+import type { Order, OrderEvent, Pipeline } from "@/models/types";
 
-interface OrdersData {
+interface OrdersPage {
   orders: Order[];
   nextCursor: string | null;
 }
 
 interface OrderDetailData {
   order: Order;
-  events: import("@/models/types").OrderEvent[];
-  pipeline: import("@/models/types").Pipeline | null;
+  events: OrderEvent[];
+  pipeline: Pipeline | null;
 }
 
 async function fetcher(url: string) {
   const res = await fetch(url);
-  if (!res.ok) {
-    const error = new Error("Failed to fetch orders");
-    throw error;
-  }
+  if (!res.ok) throw new Error("Failed to fetch");
   return res.json();
 }
 
@@ -27,35 +25,57 @@ interface UseOrdersOptions {
   stage?: string;
   source?: string;
   search?: string;
+  today?: boolean;
   limit?: number;
 }
 
 export function useOrders(options: UseOrdersOptions = {}) {
-  const params = new URLSearchParams();
-  if (options.stage) params.set("stage", options.stage);
-  if (options.source) params.set("source", options.source);
-  if (options.search) params.set("search", options.search);
-  if (options.limit) params.set("limit", String(options.limit));
+  const { stage, source, search, today, limit = 25 } = options;
 
-  const url = `/api/orders?${params.toString()}`;
+  const getKey = (pageIndex: number, previousPageData: OrdersPage | null) => {
+    // No more pages
+    if (previousPageData && !previousPageData.nextCursor) return null;
 
-  const { data, error, isLoading, mutate } = useSWR<OrdersData>(url, fetcher, {
-    revalidateOnFocus: false,
-  });
+    const params = new URLSearchParams();
+    if (stage) params.set("stage", stage);
+    if (source) params.set("source", source);
+    if (search) params.set("search", search);
+    if (today) params.set("today", "true");
+    params.set("limit", String(limit));
+
+    if (pageIndex > 0 && previousPageData?.nextCursor) {
+      params.set("cursor", previousPageData.nextCursor);
+    }
+
+    return `/api/orders?${params.toString()}`;
+  };
+
+  const { data, error, isLoading, isValidating, size, setSize } =
+    useSWRInfinite<OrdersPage>(getKey, fetcher, {
+      revalidateOnFocus: false,
+      revalidateFirstPage: false,
+    });
+
+  const orders = data ? data.flatMap((page) => page.orders) : [];
+  const lastPage = data ? data[data.length - 1] : null;
+  const hasMore = !!lastPage?.nextCursor;
+  const isLoadingMore = isValidating && size > (data?.length ?? 0);
 
   return {
-    orders: data?.orders ?? [],
-    nextCursor: data?.nextCursor ?? null,
+    orders,
     isLoading,
     isError: !!error,
-    mutate,
+    hasMore,
+    isLoadingMore,
+    loadMore: () => setSize(size + 1),
   };
 }
 
 export function useOrder(orderId: string | null) {
   const { data, error, isLoading, mutate } = useSWR<OrderDetailData>(
     orderId ? `/api/orders/${orderId}` : null,
-    fetcher
+    fetcher,
+    { revalidateOnFocus: false }
   );
 
   return {

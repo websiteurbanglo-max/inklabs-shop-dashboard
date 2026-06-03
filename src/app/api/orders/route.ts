@@ -11,32 +11,48 @@ export async function GET(request: NextRequest) {
     const stage = searchParams.get("stage");
     const source = searchParams.get("source");
     const search = searchParams.get("search");
+    const today = searchParams.get("today") === "true";
+    const cursor = searchParams.get("cursor");
     const limitParam = searchParams.get("limit");
-    const limit = limitParam ? parseInt(limitParam, 10) : 25;
+    const limit = Math.min(limitParam ? parseInt(limitParam, 10) : 25, 100);
 
-    let query = adminDb
+    const ordersRef = adminDb
       .collection("shops")
       .doc(session.shopId)
-      .collection("orders")
+      .collection("orders");
+
+    // Resolve cursor document once (needed for startAfter)
+    let cursorDoc: FirebaseFirestore.DocumentSnapshot | null = null;
+    if (cursor) {
+      cursorDoc = await ordersRef.doc(cursor).get();
+    }
+
+    // Build base query
+    let query: FirebaseFirestore.Query = ordersRef
       .orderBy("createdAt", "desc")
       .limit(limit);
 
-    if (stage) {
-      query = adminDb
-        .collection("shops")
-        .doc(session.shopId)
-        .collection("orders")
+    if (today) {
+      const startOfToday = new Date();
+      startOfToday.setHours(0, 0, 0, 0);
+      query = ordersRef
+        .where("createdAt", ">=", startOfToday)
+        .orderBy("createdAt", "desc")
+        .limit(limit);
+    } else if (stage) {
+      query = ordersRef
         .where("currentStageKey", "==", stage)
         .orderBy("createdAt", "desc")
-        .limit(limit) as typeof query;
+        .limit(limit);
     } else if (source === "shopify" || source === "studio") {
-      query = adminDb
-        .collection("shops")
-        .doc(session.shopId)
-        .collection("orders")
+      query = ordersRef
         .where("source", "==", source)
         .orderBy("createdAt", "desc")
-        .limit(limit) as typeof query;
+        .limit(limit);
+    }
+
+    if (cursorDoc?.exists) {
+      query = query.startAfter(cursorDoc);
     }
 
     const snap = await query.get();
@@ -45,7 +61,6 @@ export async function GET(request: NextRequest) {
       orderId: doc.id,
     })) as Order[];
 
-    // Search filter (applied in-memory)
     if (search) {
       const q = search.toLowerCase();
       orders = orders.filter(
@@ -56,12 +71,11 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const lastDoc = snap.docs[snap.docs.length - 1];
+    // Only return cursor when there are likely more pages
+    const hasMore = snap.docs.length >= limit;
+    const nextCursor = hasMore ? snap.docs[snap.docs.length - 1].id : null;
 
-    return Response.json({
-      orders,
-      nextCursor: lastDoc ? lastDoc.id : null,
-    });
+    return Response.json({ orders, nextCursor });
   } catch (error) {
     return handleAuthError(error);
   }
