@@ -20,55 +20,51 @@ export default async function PricingPage() {
     redirect("/dashboard");
   }
 
-  let variantGroups: VariantGroupDef[] = [
-    { key: "small", label: "Small (2-4 inch)", sizes: [2, 3, 4] },
-    { key: "medium", label: "Medium (5-7 inch)", sizes: [5, 6, 7] },
-    { key: "large", label: "Large (8-10 inch)", sizes: [8, 9, 10] },
-  ];
-
-  try {
-    const configDoc = await adminDb
-      .collection("platform_config")
-      .doc("settings")
-      .get();
-    if (configDoc.exists && configDoc.data()?.variantGroups) {
-      variantGroups = configDoc.data()!.variantGroups;
-    }
-  } catch {
-    // use defaults
-  }
-
-  let shopRules: PricingRule[] = [];
-  try {
-    const shopRulesSnap = await adminDb
+  const [configResult, shopRulesResult, globalRulesResult] = await Promise.allSettled([
+    adminDb.collection("platform_config").doc("settings").get(),
+    adminDb
       .collection("shops")
       .doc(session.shopId)
       .collection("pricing")
       .doc("rules")
       .collection("items")
       .where("isActive", "==", true)
-      .get();
-    shopRules = shopRulesSnap.docs.map(
-      (doc) => ({ ...doc.data(), ruleId: doc.id }) as PricingRule
-    );
-  } catch {
-    // no shop rules
-  }
-
-  let globalRules: PricingRule[] = [];
-  try {
-    const globalRulesSnap = await adminDb
+      .get(),
+    adminDb
       .collection("pricing")
       .doc("global")
       .collection("rules")
       .where("isActive", "==", true)
-      .get();
-    globalRules = globalRulesSnap.docs.map(
-      (doc) => ({ ...doc.data(), ruleId: doc.id }) as PricingRule
-    );
-  } catch {
-    // no global rules
+      .get(),
+  ]);
+
+  let variantGroups: VariantGroupDef[] = [
+    { key: "small", label: "Small (2-4 inch)", sizes: [2, 3, 4] },
+    { key: "medium", label: "Medium (5-7 inch)", sizes: [5, 6, 7] },
+    { key: "large", label: "Large (8-10 inch)", sizes: [8, 9, 10] },
+  ];
+
+  if (
+    configResult.status === "fulfilled" &&
+    configResult.value.exists &&
+    configResult.value.data()?.variantGroups
+  ) {
+    variantGroups = configResult.value.data()!.variantGroups;
   }
+
+  const shopRules: PricingRule[] =
+    shopRulesResult.status === "fulfilled"
+      ? shopRulesResult.value.docs.map(
+          (doc) => ({ ...doc.data(), ruleId: doc.id }) as PricingRule
+        )
+      : [];
+
+  const globalRules: PricingRule[] =
+    globalRulesResult.status === "fulfilled"
+      ? globalRulesResult.value.docs.map(
+          (doc) => ({ ...doc.data(), ruleId: doc.id }) as PricingRule
+        )
+      : [];
 
   const shopRuleMap = new Map(
     shopRules.map((r) => [`${r.variantGroup}-${r.minQty}-${r.maxQty}`, r])

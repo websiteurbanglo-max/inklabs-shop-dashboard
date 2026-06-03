@@ -23,7 +23,7 @@ export async function verifyShopUser(): Promise<ShopSession> {
 
   let decoded;
   try {
-    decoded = await adminAuth.verifySessionCookie(sessionCookie, true);
+    decoded = await adminAuth.verifySessionCookie(sessionCookie, false);
   } catch {
     throw new AuthError("Invalid or expired session", 401);
   }

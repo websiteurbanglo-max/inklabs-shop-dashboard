@@ -9,53 +9,47 @@ import { Card } from "@/components/ui/card";
 import type { Order } from "@/models/types";
 
 async function getDashboardData(shopId: string) {
-  const ordersSnap = await adminDb
+  const ordersRef = adminDb
     .collection("shops")
     .doc(shopId)
-    .collection("orders")
-    .orderBy("createdAt", "desc")
-    .limit(10)
-    .get();
-
-  const orders = ordersSnap.docs.map((doc) => ({
-    ...doc.data(),
-    orderId: doc.id,
-  })) as Order[];
-
-  const allOrdersSnap = await adminDb
-    .collection("shops")
-    .doc(shopId)
-    .collection("orders")
-    .orderBy("createdAt", "desc")
-    .limit(1000)
-    .get();
-
-  const allOrders = allOrdersSnap.docs.map((d) => d.data() as Order);
+    .collection("orders");
 
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
+  const [
+    recentSnap,
+    statsSnap,
+    totalCountSnap,
+    monthCountSnap,
+    pendingCountSnap,
+  ] = await Promise.all([
+    ordersRef.orderBy("createdAt", "desc").limit(10).get(),
+    ordersRef.orderBy("createdAt", "desc").limit(200).get(),
+    ordersRef.count().get(),
+    ordersRef.where("createdAt", ">=", startOfMonth).count().get(),
+    ordersRef.where("currentStageKey", "==", "received").count().get(),
+  ]);
+
+  const orders = recentSnap.docs.map((doc) => ({
+    ...doc.data(),
+    orderId: doc.id,
+  })) as Order[];
+
+  const statsOrders = statsSnap.docs.map((d) => d.data() as Order);
+
   const stats = {
-    totalOrders: allOrders.length,
-    totalRevenue: allOrders.reduce(
+    totalOrders: totalCountSnap.data().count,
+    totalRevenue: statsOrders.reduce(
       (sum, o) => sum + (o.billingSnapshot?.total || 0),
       0
     ),
-    ordersThisMonth: allOrders.filter((o) => {
-      const d =
-        o.createdAt instanceof Date
-          ? o.createdAt
-          : typeof o.createdAt === "string"
-            ? new Date(o.createdAt)
-            : (o.createdAt as { toDate?: () => Date }).toDate?.() ?? new Date();
-      return d >= startOfMonth;
-    }).length,
-    pendingOrders: allOrders.filter((o) => o.currentStageKey === "received")
-      .length,
+    ordersThisMonth: monthCountSnap.data().count,
+    pendingOrders: pendingCountSnap.data().count,
   };
 
   const stageCounts: Record<string, number> = {};
-  for (const order of allOrders) {
+  for (const order of statsOrders) {
     const key = order.currentStageKey || "unknown";
     stageCounts[key] = (stageCounts[key] || 0) + 1;
   }
@@ -91,15 +85,12 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  let userDisplayName = session.email;
-  try {
-    const userRecord = await adminAuth.getUser(session.uid);
-    userDisplayName = userRecord.displayName || session.email;
-  } catch {
-    // ignore
-  }
+  const [userRecord, { orders, stats, stageCounts }] = await Promise.all([
+    adminAuth.getUser(session.uid).catch(() => null),
+    getDashboardData(session.shopId),
+  ]);
 
-  const { orders, stats, stageCounts } = await getDashboardData(session.shopId);
+  const userDisplayName = userRecord?.displayName || session.email;
 
   const canCreateOrder =
     session.role === "operator" ||

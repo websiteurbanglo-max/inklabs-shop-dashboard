@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
 import type { MemberRole } from "@/models/types";
 
 interface TopbarProps {
@@ -12,30 +13,9 @@ interface TopbarProps {
   role: MemberRole;
 }
 
-export default function Topbar({ shopDisplayName, shopId, role }: TopbarProps) {
-  const [userInfo, setUserInfo] = useState<{
-    displayName?: string;
-    email?: string;
-    photoURL?: string;
-    shopType?: string;
-  } | null>(null);
+export default function Topbar({ shopDisplayName, role }: TopbarProps) {
+  const { user, shop } = useAuth();
   const [signingOut, setSigningOut] = useState(false);
-
-  useEffect(() => {
-    fetch("/api/auth/me")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.user) {
-          setUserInfo({
-            displayName: data.user.displayName,
-            email: data.user.email,
-            photoURL: data.user.photoURL,
-            shopType: data.shop?.shopType,
-          });
-        }
-      })
-      .catch(() => {});
-  }, []);
 
   const handleSignOut = async () => {
     setSigningOut(true);
@@ -58,8 +38,7 @@ export default function Topbar({ shopDisplayName, shopId, role }: TopbarProps) {
     viewer: "bg-gray-50 text-gray-500 border-gray-200/60",
   };
 
-  const shopTypeLabel =
-    userInfo?.shopType === "shopify" ? "Shopify" : "Studio";
+  const shopTypeLabel = shop?.shopType === "shopify" ? "Shopify" : "Studio";
 
   return (
     <header className="h-16 glass-subtle border-b border-gray-100/60 flex items-center justify-between px-4 sm:px-6 flex-shrink-0 sticky top-0 z-10">
@@ -73,7 +52,7 @@ export default function Topbar({ shopDisplayName, shopId, role }: TopbarProps) {
             <span
               className={cn(
                 "text-[10px] px-1.5 py-px rounded-md font-medium border",
-                userInfo?.shopType === "shopify"
+                shop?.shopType === "shopify"
                   ? "bg-emerald-50 text-emerald-600 border-emerald-200/60"
                   : "bg-purple-50 text-purple-600 border-purple-200/60"
               )}
@@ -126,16 +105,16 @@ export default function Topbar({ shopDisplayName, shopId, role }: TopbarProps) {
 
         {/* User avatar + sign out */}
         <div className="flex items-center gap-2.5">
-          {userInfo?.photoURL ? (
+          {user?.photoURL ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
-              src={userInfo.photoURL}
-              alt={userInfo.displayName || ""}
+              src={user.photoURL}
+              alt={user.displayName || ""}
               className="w-8 h-8 rounded-xl border border-gray-200/60 shadow-sm object-cover"
             />
           ) : (
             <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-100 to-indigo-50 flex items-center justify-center text-xs font-bold text-indigo-600 border border-indigo-200/40">
-              {(userInfo?.displayName || userInfo?.email || "U")
+              {(user?.displayName || user?.email || "U")
                 .charAt(0)
                 .toUpperCase()}
             </div>
@@ -143,7 +122,7 @@ export default function Topbar({ shopDisplayName, shopId, role }: TopbarProps) {
 
           <div className="hidden sm:block min-w-0">
             <p className="text-xs font-medium text-gray-800 truncate max-w-32">
-              {userInfo?.displayName || userInfo?.email || "..."}
+              {user?.displayName || user?.email || "..."}
             </p>
           </div>
 

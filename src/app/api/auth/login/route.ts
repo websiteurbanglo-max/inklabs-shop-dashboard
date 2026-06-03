@@ -18,7 +18,7 @@ async function getMembershipDocsForUser(uid: string) {
       throw error;
     }
 
-    // Fallback path: avoid collection group dependency (e.g. missing index/setup).
+    // Fallback: avoid collection group dependency (e.g. missing index/setup).
     const shopsSnap = await adminDb.collection("shops").get();
     const docs = await Promise.all(
       shopsSnap.docs.map((shopDoc) =>
@@ -54,40 +54,44 @@ export async function POST(request: NextRequest) {
     // Step 2: Query all memberships for this UID
     const memberDocs = await getMembershipDocsForUser(uid);
 
-    // Step 3: Build membership list with shop info
-    const memberships: ShopMembership[] = [];
-    for (const doc of memberDocs) {
-      const data = doc.data();
-      if (!data) continue;
-      // doc.ref.parent.parent is the shop document
-      const shopRef = doc.ref.parent.parent;
-      if (!shopRef) continue;
+    // Step 3: Build membership list — fetch all shop docs in parallel
+    const membershipResults = await Promise.all(
+      memberDocs.map(async (doc) => {
+        const data = doc.data();
+        if (!data) return null;
+        const shopRef = doc.ref.parent.parent;
+        if (!shopRef) return null;
 
-      let shopName = shopRef.id;
-      let shopType: "shopify" | "studio" = "studio";
-      let logoUrl: string | undefined;
+        let shopName = shopRef.id;
+        let shopType: "shopify" | "studio" = "studio";
+        let logoUrl: string | undefined;
 
-      try {
-        const shopDoc = await shopRef.get();
-        if (shopDoc.exists) {
-          shopName = shopDoc.data()?.displayName || shopRef.id;
-          shopType = shopDoc.data()?.shopType || "studio";
-          logoUrl = shopDoc.data()?.logoUrl;
+        try {
+          const shopDoc = await shopRef.get();
+          if (shopDoc.exists) {
+            shopName = shopDoc.data()?.displayName || shopRef.id;
+            shopType = shopDoc.data()?.shopType || "studio";
+            logoUrl = shopDoc.data()?.logoUrl;
+          }
+        } catch {
+          // ignore
         }
-      } catch {
-        // ignore
-      }
 
-      memberships.push({
-        shopId: shopRef.id,
-        shopName,
-        shopType,
-        logoUrl,
-        role: data.role,
-        status: data.status,
-        requestedAt: data.requestedAt?.toDate?.()?.toISOString(),
-      });
-    }
+        return {
+          shopId: shopRef.id,
+          shopName,
+          shopType,
+          logoUrl,
+          role: data.role,
+          status: data.status,
+          requestedAt: data.requestedAt?.toDate?.()?.toISOString(),
+        } as ShopMembership;
+      })
+    );
+
+    const memberships = membershipResults.filter(
+      (m): m is ShopMembership => m !== null
+    );
 
     // Step 4: Determine redirect path
     const activeMemberships = memberships.filter((m) => m.status === "active");
@@ -124,33 +128,20 @@ export async function POST(request: NextRequest) {
     });
 
     // Step 6: Set shop context if we have exactly one active shop, or a specific shopId was chosen
-    let selectedShopId: string | null = null;
     let selectedMembership: ShopMembership | null = null;
 
     if (activeMemberships.length === 1) {
-      selectedShopId = activeMemberships[0].shopId;
       selectedMembership = activeMemberships[0];
-    } else if (shopId && activeMemberships.find((m) => m.shopId === shopId)) {
-      selectedShopId = shopId;
-      selectedMembership = activeMemberships.find((m) => m.shopId === shopId)!;
+    } else if (shopId) {
+      selectedMembership = activeMemberships.find((m) => m.shopId === shopId) ?? null;
     }
 
-    if (selectedShopId && selectedMembership) {
-      // Fetch the member's actual role from Firestore
-      const memberDoc = await adminDb
-        .collection("shops")
-        .doc(selectedShopId)
-        .collection("members")
-        .doc(uid)
-        .get();
-
-      const role = memberDoc.data()?.role || selectedMembership.role;
-
+    if (selectedMembership) {
       cookieStore.set(
         "__shop_context",
         JSON.stringify({
-          shopId: selectedShopId,
-          role,
+          shopId: selectedMembership.shopId,
+          role: selectedMembership.role,
           shopDisplayName: selectedMembership.shopName,
         }),
         {
